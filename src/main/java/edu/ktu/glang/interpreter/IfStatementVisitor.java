@@ -38,18 +38,18 @@ public class IfStatementVisitor extends GLangBaseVisitor<Object> {
         switch (relOp) {
             case "==" -> {
                 if(left instanceof Integer && right instanceof Integer) {
-                    return (Integer)left == (Integer)right;
+                    return left == right;
                 } else if (left instanceof String && right instanceof String) {
-                    return ((String) left).equals(right);
+                    return (left).equals(right);
                 } else {
                     throw new RuntimeException("Incompatible types.");
                 }
             }
             case "!=" -> {
                 if(left instanceof Integer && right instanceof Integer) {
-                    return (Integer)left != (Integer)right;
+                    return left != right;
                 } else if (left instanceof String && right instanceof String) {
-                    return !((String) left).equals(right);
+                    return !left.equals(right);
                 } else {
                     throw new RuntimeException("Incompatible types.");
                 }
