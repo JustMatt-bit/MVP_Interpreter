@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Interactive" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="edu.ktu.glang.interpreter.GLangInterpreter" />
-    <module name="glang-interpreter" />
+    <module name="MVP_Interpreter" />
     <option name="PROGRAM_PARAMETERS" value="-i" />
     <extension name="coverage">
       <pattern>
