@@ -1,19 +1,5 @@
-int a = 42;
-int b = 1;
-
-string s = "abc";
-string sb = "asbc";
-
-print(sb);
-
-if (a != b) {
-    print(1);
-} else {
-    print(2);
+fun int testas (int rez, <) {
+    print(5);
 }
-
-if (s == sb) {
-  print(1);
-} else {
-  print(2);
-}
+int a = 5;
+testas(a, ==);

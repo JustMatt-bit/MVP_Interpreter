@@ -1,13 +1,30 @@
 grammar GLang;
 
-program : statement+ EOF ;
+program : line+ EOF ;
+
+line
+ : functionDeclaration
+ | statement
+ ;
 
 statement
     : variableDeclaration ';'
     | assignment ';'
+    | functionCall ';'
     | ifStatement
     | printStatement ';'
     ;
+
+functionDeclaration : 'fun' TYPE ID '(' paramList? ')' functionBody ;
+
+//paramList : TYPE ID (',' TYPE ID)* ;
+paramList: param (',' param)* ;
+
+param : typeParam | operator;
+
+typeParam : TYPE ID ;
+
+functionBody : block ;
 
 variableDeclaration : TYPE ID '=' expression ;
 
@@ -25,10 +42,26 @@ expression
 intMultiOp : '*' | '/' | '%' ;
 intAddOp : '+' | '-' ;
 
-ifStatement : 'if' '(' expression relationOp expression ')' '{' statement '}'
-    ('else' '{' statement '}')? ;
+
+ifStatement : 'if' '(' expression relationOp expression ')' block ('else' block )? ;
+
+functionCall : ID '(' argumentsList? ')' ;
+
+argumentsList
+: argument (',' argument)*
+;
+
+argument : expression | operator;
+
+block : '{' statement* '}' ;
+
+returnStatement : 'return' expression? ;
+
 
 relationOp : '==' | '!=' | '>' | '<' | '<=' | '>=';
+
+operator : '==' | '!=' | '>' | '<' | '<=' | '>=' |
+    '*' | '/' | '%' | '+' | '-';
 
 printStatement : PRINT '(' expression ')' ;
 

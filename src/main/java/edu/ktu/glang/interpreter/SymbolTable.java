@@ -1,20 +1,22 @@
 package edu.ktu.glang.interpreter;
 
+import edu.ktu.glang.interpreter.types.Value;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
-    private final Map<String, Object> table;
+    private final Map<String, Value> table;
 
     public SymbolTable() {
         table = new HashMap<>();
     }
 
-    public void put(String name, Object value) {
+    public void put(String name, Value value) {
         table.put(name, value);
     }
 
-    public Object get(String name) {
+    public Value get(String name) {
         return table.get(name);
     }
 

@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run file" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="edu.ktu.glang.interpreter.GLangInterpreter" />
-    <module name="MVP_Interpreter" />
+    <module name="glang-interpreter" />
     <option name="PROGRAM_PARAMETERS" value="-f samples/test.glang" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="edu.ktu.glang.interpreter.types.*" />
+        <option name="PATTERN" value="edu.ktu.glang.interpreter.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

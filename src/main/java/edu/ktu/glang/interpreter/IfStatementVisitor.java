@@ -22,13 +22,11 @@ public class IfStatementVisitor extends GLangBaseVisitor<Object> {
         TerminalNode relOpNode = (TerminalNode) ctx.relationOp().getChild(0);
         String relOp = relOpNode.getText();
 
-        System.out.println(left.getClass().toString());
-
         // Resolve the condition and execute the appropriate statement
         if (resolveCondition(left, right, relOp)) {
-            return parent.visit(ctx.statement(0));
-        } else if (ctx.statement(1) != null) {
-            return parent.visit(ctx.statement(1));
+            return parent.visit(ctx.block(0));
+        } else if (ctx.block(1) != null) {
+            return parent.visit(ctx.block(1));
         } else {
             return null; // or return a default value or another appropriate action
         }

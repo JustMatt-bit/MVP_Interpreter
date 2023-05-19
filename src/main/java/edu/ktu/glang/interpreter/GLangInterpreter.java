@@ -1,5 +1,6 @@
 package edu.ktu.glang.interpreter;
 
+import com.sun.source.tree.Scope;
 import edu.ktu.glang.GLangLexer;
 import edu.ktu.glang.GLangParser;
 import org.antlr.v4.runtime.CharStream;
@@ -72,8 +73,8 @@ public class GLangInterpreter {
     }
 
     private static void processInteractiveInput() throws IOException {
-        SymbolTable symbolTable = new SymbolTable();
-
+        //SymbolTable symbolTable = new SymbolTable();
+        MVPLangScope mvpLangScope = new MVPLangScope();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
         while (true) {
@@ -84,7 +85,7 @@ public class GLangInterpreter {
             }
             input += line + "\n";
             try {
-                String output = executeCode(symbolTable, CharStreams.fromString(input));
+                String output = executeCode(mvpLangScope, CharStreams.fromString(input));
                 if (output != null) {
                     input = "";
                     if (!output.equals("")) {
@@ -100,9 +101,10 @@ public class GLangInterpreter {
     }
 
     public static void processFile(String filename) {
-        SymbolTable symbolTable = new SymbolTable();
+        //SymbolTable symbolTable = new SymbolTable();
+        MVPLangScope mvpLangScope = new MVPLangScope();
         try {
-            String output = executeCode(symbolTable, CharStreams.fromFileName(filename));
+            String output = executeCode(mvpLangScope, CharStreams.fromFileName(filename));
             System.out.println("<PROGRAM OUTPUT>");
             System.out.println(output);
         } catch (Exception e) {
@@ -112,10 +114,10 @@ public class GLangInterpreter {
     }
 
     public static String execute(String program) {
-        return executeCode(new SymbolTable(), CharStreams.fromString(program));
+        return executeCode(new MVPLangScope(), CharStreams.fromString(program));
     }
 
-    private static String executeCode(SymbolTable symbolTable, CharStream input) {
+    private static String executeCode(MVPLangScope scope, CharStream input) {
         GLangLexer lexer = new GLangLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GLangParser parser = new GLangParser(tokens);
@@ -132,7 +134,7 @@ public class GLangInterpreter {
             return null;
         }
 
-        InterpreterVisitor interpreter = new InterpreterVisitor(symbolTable);
+        InterpreterVisitor interpreter = new InterpreterVisitor(scope);
         return (String) interpreter.visit(tree);
     }
 }
