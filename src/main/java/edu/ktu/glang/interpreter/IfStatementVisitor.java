@@ -20,10 +20,9 @@ public class IfStatementVisitor extends GLangBaseVisitor<Object> {
 
         // Get the relation operator from the context
         TerminalNode relOpNode = (TerminalNode) ctx.relationOp().getChild(0);
-        String relOp = relOpNode.getText();
-
+        String operator = parent.getOperatorOverload(relOpNode.getText());
         // Resolve the condition and execute the appropriate statement
-        if (resolveCondition(left, right, relOp)) {
+        if (resolveCondition(left, right, operator)) {
             return parent.visit(ctx.block(0));
         } else if (ctx.block(1) != null) {
             return parent.visit(ctx.block(1));

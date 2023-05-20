@@ -10,17 +10,18 @@ line
 statement
     : variableDeclaration ';'
     | assignment ';'
-    | functionCall ';'
+    | functionCall
     | ifStatement
     | printStatement ';'
-    ;
+    | returnStatement ';' ;
 
-functionDeclaration : 'fun' TYPE ID '(' paramList? ')' functionBody ;
+
+functionDeclaration : 'fun' (TYPE | VOID) ID '(' paramList? ')' functionBody ;
 
 //paramList : TYPE ID (',' TYPE ID)* ;
 paramList: param (',' param)* ;
 
-param : typeParam | operator;
+param : typeParam;
 
 typeParam : TYPE ID ;
 
@@ -37,6 +38,7 @@ expression
     | '(' expression ')'                #parenthesesExpression
     | expression intMultiOp expression  #intMultiOpExpression
     | expression intAddOp expression    #intAddOpExpression
+    | functionCall                      #functionExpression
     ;
 
 intMultiOp : '*' | '/' | '%' ;
@@ -48,20 +50,18 @@ ifStatement : 'if' '(' expression relationOp expression ')' block ('else' block 
 functionCall : ID '(' argumentsList? ')' ;
 
 argumentsList
-: argument (',' argument)*
+: (expression | operatorOverload) (',' (expression | operatorOverload))*
 ;
 
-argument : expression | operator;
+operatorOverload : (relationOp relationOp) | (arithmeticOp arithmeticOp) ;
 
 block : '{' statement* '}' ;
 
 returnStatement : 'return' expression? ;
 
-
 relationOp : '==' | '!=' | '>' | '<' | '<=' | '>=';
 
-operator : '==' | '!=' | '>' | '<' | '<=' | '>=' |
-    '*' | '/' | '%' | '+' | '-';
+arithmeticOp : '+' | '-' | '*' | '/' | '%' ;
 
 printStatement : PRINT '(' expression ')' ;
 
@@ -70,6 +70,7 @@ TYPE    : 'int'
         | 'string'
         ;
 
+VOID : 'void' ;
 PRINT   : 'print';
 ID      : [a-zA-Z]+ ;
 INT     : [0-9]+ ;

@@ -20,12 +20,12 @@ public class MVPLangScope {
 
     public void declareVariable(String variableName, Value value){
         if(isDeclared(variableName)){
-            throw new RuntimeException("Variable is already declared");
+            throw new RuntimeException(String.format("Variable '%s' is already declared.", variableName));
         }
         symbols.put(variableName, value);
     }
 
-    private boolean isDeclared(String variableName){
+    public boolean isDeclared(String variableName){
         if(symbols.containsKey(variableName)){
             return true;
         }
@@ -63,7 +63,7 @@ public class MVPLangScope {
         if(operatorOverload.containsKey(operator)){
             return true;
         }
-        return parent != null && parent.operatorOverload.containsKey(operator);
+        return parent != null && parent.isOverloaded(operator);
     }
 
     public void overLoadOperator(String operator, String newOperator){
@@ -72,7 +72,7 @@ public class MVPLangScope {
 
     public String resolveOperator(String operator){
         if (!isOverloaded(operator)) {
-            throw new RuntimeException("Operator not overloaded");
+            return null;
         }
         if (operatorOverload.containsKey(operator)) {
             return operatorOverload.get(operator);
