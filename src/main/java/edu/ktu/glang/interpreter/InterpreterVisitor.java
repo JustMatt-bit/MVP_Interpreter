@@ -2,6 +2,7 @@ package edu.ktu.glang.interpreter;
 
 import edu.ktu.glang.GLangBaseVisitor;
 import edu.ktu.glang.GLangParser;
+import edu.ktu.glang.interpreter.exception.MVPReturnStatementException;
 import edu.ktu.glang.interpreter.types.Type;
 import edu.ktu.glang.interpreter.types.Value;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -90,9 +91,13 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     public Object visitIntAddOpExpression(GLangParser.IntAddOpExpressionContext ctx) {
         Object val1 = visit(ctx.expression(0));
         Object val2 = visit(ctx.expression(1));
-        return switch (ctx.intAddOp().getText()) {
+        String operator = getOperatorOverload(ctx.intAddOp().getText());
+        return switch (operator) {
             case "+" -> (Integer) val1 + (Integer) val2;
             case "-" -> (Integer) val1 - (Integer) val2;
+            case "*" -> (Integer) val1 * (Integer) val2;
+            case "/" -> (Integer) val1 / (Integer) val2;
+            case "%" -> (Integer) val1 % (Integer) val2;
             default -> null;
         };
     }
@@ -102,10 +107,13 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
         Object val1 = visit(ctx.expression(0));
         Object val2 = visit(ctx.expression(1));
         //TODO - validation etc
-        return switch (ctx.intMultiOp().getText()) {
+        String operator = getOperatorOverload(ctx.intMultiOp().getText());
+        return switch (operator) {
             case "*" -> (Integer) val1 * (Integer) val2;
             case "/" -> (Integer) val1 / (Integer) val2;
             case "%" -> (Integer) val1 % (Integer) val2;
+            case "+" -> (Integer) val1 + (Integer) val2;
+            case "-" -> (Integer) val1 - (Integer) val2;
             default -> null;
         };
     }
@@ -119,7 +127,15 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     public Object visitBlock(GLangParser.BlockContext ctx) {
         scopeStack.push(currentScope);
         currentScope = new MVPLangScope(currentScope);
-        Object value = super.visitBlock(ctx);
+        Object value = null;
+        try {
+            value = super.visitBlock(ctx);
+        }
+        catch (MVPReturnStatementException returned){
+            value = returned.object;
+            currentScope = scopeStack.pop();
+            throw new MVPReturnStatementException(value);
+        }
         currentScope = scopeStack.pop();
         return value;
     }
@@ -149,57 +165,89 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
         // Validating argument count, type and then copying them to the new scope
         if(funCtx.paramList() != null){
             var funParams = funCtx.paramList().param();
-            var args = ctx.argumentsList().argument();
+            var expressions = ctx.argumentsList().expression();
 
-            if(funParams.size() != args.size()){
+            if(funParams.size() != expressions.size()){
                 throw new RuntimeException("Invalid number of arguments");
             }
             else{
                 for(int i = 0; i < funParams.size(); i++){
                     var param = funParams.get(i);
-                    var arg = args.get(i);
-                    if(param.typeParam() != null){
-                        Value argValue = currentScope.resolveVariable(arg.getText());
-                        Type.BaseType argType = argValue.getType().getBaseType();
-                        Type reqType = Type.createType(param.typeParam().TYPE().getText());
-                        if(argType != reqType.getBaseType()){
-                            throw new RuntimeException("Function argument type mismatch");
-                        }
-                    }
-                    else if(param.operator() != null){
-                        if(arg.operator() == null) throw new RuntimeException("Function argument type mismatch");
+                    var arg = expressions.get(i);
+                    Value argValue = currentScope.resolveVariable(arg.getText());
+                    Type.BaseType argType = argValue.getType().getBaseType();
+                    Type reqType = Type.createType(param.typeParam().TYPE().getText());
+                    if(argType != reqType.getBaseType()){
+                        throw new RuntimeException("Function argument type mismatch");
                     }
                 }
             }
-
-            for(int i = 0; i < args.size(); i++){
+            // Saving function call arguments into the function scope
+            for(int i = 0; i < expressions.size(); i++){
                 var param = funParams.get(i);
-                var arg = args.get(i);
-                if(param.typeParam() != null){
-                    Value value = currentScope.resolveVariable(args.get(i).getText());
-                    Value copyValue = new Value(value);
-                    functionScope.declareVariable(param.typeParam().ID().getText(), value);
-                }
-                else if(param.operator() != null){
-                    functionScope.overLoadOperator(param.operator().getText(), arg.operator().getText());
-                }
+                var arg = expressions.get(i);
+                Value value = currentScope.resolveVariable(expressions.get(i).getText());
+                Value copyValue = new Value(value);
+                functionScope.declareVariable(param.typeParam().ID().getText(), value);
             }
         }
+
+        // Saving function call operator overloads into the function scope, if there is any
+        if(ctx.argumentsList() != null) {
+            var opOverloads = ctx.argumentsList().operatorOverload();
+            for (int i = 0; i < opOverloads.size(); i++) {
+                if (opOverloads.get(i).relationOp(0) != null)
+                    functionScope.overLoadOperator(opOverloads.get(i).relationOp(0).getText(), opOverloads.get(i).relationOp(1).getText());
+                else
+                    functionScope.overLoadOperator(opOverloads.get(i).arithmeticOp(0).getText(), opOverloads.get(i).arithmeticOp(1).getText());
+            }
+        }
+
         // switch scopes and after completing function body switching scopes back
         scopeStack.push(currentScope);
         currentScope = functionScope;
-        ReturnValue returnValue = (ReturnValue) this.visitFunctionBody(funCtx.functionBody());
+        Object returnValue = this.visitFunctionBody(funCtx.functionBody());
         currentScope = scopeStack.pop();
-
-        return returnValue.value();
+        if(funCtx.TYPE() != null){
+            if(returnValue == null) throw new RuntimeException("Return statement is empty");
+            returnValue = Type.castObjectToType(returnValue, funCtx.TYPE().getText());
+            return returnValue;
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
     public Object visitFunctionBody(GLangParser.FunctionBodyContext ctx) {
-        Object value = super.visitFunctionBody(ctx);
-        if (value instanceof ReturnValue) {
-            return value;
+        Object value = null;
+        try {
+            value = super.visitFunctionBody(ctx);
         }
-        return new ReturnValue(null);
+        catch (MVPReturnStatementException returned){
+            value = returned.object;
+        }
+        return value;
+    }
+
+    @Override
+    public Object visitReturnStatement(GLangParser.ReturnStatementContext ctx) {
+        if(ctx.expression() != null){
+            Object value = visit(ctx.expression());
+            throw new MVPReturnStatementException(value);
+        }
+        else{
+            throw new MVPReturnStatementException(null);
+        }
+    }
+
+    public String getOperatorOverload(String oldOp){
+        String operator = currentScope.resolveOperator(oldOp);
+        if(operator == null){
+            return oldOp;
+        }
+        else {
+            return operator;
+        }
     }
 }

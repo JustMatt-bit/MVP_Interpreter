@@ -1,5 +1,7 @@
-fun int testas (int rez, <) {
-    print(5);
+fun void testas () {
+    if(5 != 5){
+        print(4 + 3);
+    }
+    print(4 + 3);
 }
-int a = 5;
-testas(a, ==);
+testas(+ -, != ==)

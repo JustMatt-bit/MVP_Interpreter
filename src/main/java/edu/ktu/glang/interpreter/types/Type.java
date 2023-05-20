@@ -31,4 +31,15 @@ public abstract class Type {
                 throw new RuntimeException("Unknown type");
         }
     }
+
+    public static Object castObjectToType(Object obj, String typeName){
+        switch(typeName){
+            case "int":
+                return (Integer)obj;
+            case "string":
+                return (String)obj;
+            default:
+                throw new RuntimeException("Unknown type");
+        }
+    }
 }
