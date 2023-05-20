@@ -35,4 +35,34 @@ public class VariablesDeclarationTest {
                     GLangInterpreter.execute(program);
                 });
     }
+
+    @Test
+    void assing_variable_and_print() {
+        String program = """
+                         int a = 5;
+                         a = 6;          
+                         print(a);       
+                         """;
+
+        String expected = """
+                          6
+                          """;
+
+        String actual = GLangInterpreter.execute(program);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void assing_variable_with_type_mismatch() {
+        String program = """
+                         int a = 5;
+                         a = "abc";                  
+                         """;
+
+        assertThrows(ClassCastException.class,
+                () -> {
+                    GLangInterpreter.execute(program);
+                });
+    }
 }

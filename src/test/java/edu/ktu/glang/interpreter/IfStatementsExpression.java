@@ -94,4 +94,72 @@ public class IfStatementsExpression {
         String actual = GLangInterpreter.execute(program);
         assertEquals(expected, actual);
     }
+    @Test
+    void if_with_true_boolean(){
+        String program = """
+                         if(true){
+                         print(5);
+                         }
+                         """;
+
+        String expected = """
+                          5
+                          """;
+
+        String actual = GLangInterpreter.execute(program);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void if_with_false_boolean(){
+        String program = """
+                         if(false){
+                         print(5);
+                         }
+                         """;
+
+        String expected = """
+                          """;
+
+        String actual = GLangInterpreter.execute(program);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void if_else_with_true_boolean(){
+        String program = """
+                         if(true){
+                         print(5);
+                         }
+                         else{
+                         print(6);
+                         }
+                         """;
+
+        String expected = """
+                          5
+                          """;
+
+        String actual = GLangInterpreter.execute(program);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void if_else_with_false_boolean(){
+        String program = """
+                         if(false){
+                         print(5);
+                         }
+                         else{
+                         print(6);
+                         }
+                         """;
+
+        String expected = """
+                          6
+                          """;
+
+        String actual = GLangInterpreter.execute(program);
+        assertEquals(expected, actual);
+    }
 }

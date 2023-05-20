@@ -1,5 +1,6 @@
 package edu.ktu.glang.interpreter;
 
+import edu.ktu.glang.interpreter.types.Type;
 import edu.ktu.glang.interpreter.types.Value;
 
 import java.util.HashMap;

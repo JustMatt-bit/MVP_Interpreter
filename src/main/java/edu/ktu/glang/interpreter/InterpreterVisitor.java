@@ -23,10 +23,12 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     private final Map<String, Function> functions = new HashMap<>();
     private final Map<String, String> operatorOverload = new HashMap<>();
     private final IfStatementVisitor ifStatementVisitor;
+    private final ArithmeticsVisitor arithmeticsVisitor;
 
     public InterpreterVisitor(MVPLangScope scope) {
         this.currentScope = scope;
         this.ifStatementVisitor = new IfStatementVisitor(this);
+        this.arithmeticsVisitor = new ArithmeticsVisitor(this);
     }
 
     @Override
@@ -40,6 +42,7 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
         String varType = ctx.TYPE().getText();
         String varName = ctx.ID().getText();
         Object expValue = visit(ctx.expression());
+        expValue = Type.castObjectToType(expValue, varType);
         Value value = new Value(Type.createType(varType),expValue);
         this.currentScope.declareVariable(varName, value);
         return null;
@@ -49,6 +52,8 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     public Object visitAssignment(GLangParser.AssignmentContext ctx) {
         String varName = ctx.ID().getText();
         Object expValue = visit(ctx.expression());
+        Value value = this.currentScope.resolveVariable(varName);
+        expValue = Type.castObjectToType(expValue, value.getType().getBaseType());
         this.currentScope.changeVariable(varName, expValue);
         return null;
     }
@@ -68,10 +73,20 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitDoubleExpression(GLangParser.DoubleExpressionContext ctx) {
+        return Double.parseDouble(ctx.DOUBLE().getText());
+    }
+
+    @Override
     public Object visitIdExpression(GLangParser.IdExpressionContext ctx) {
         String varName = ctx.ID().getText();
         Value value = this.currentScope.resolveVariable(varName);
         return value.getValue();
+    }
+
+    @Override
+    public Object visitBooleanExpression(GLangParser.BooleanExpressionContext ctx) {
+        return Boolean.parseBoolean(ctx.BOOLEAN().getText());
     }
 
     @Override
@@ -88,34 +103,13 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitIntAddOpExpression(GLangParser.IntAddOpExpressionContext ctx) {
-        Object val1 = visit(ctx.expression(0));
-        Object val2 = visit(ctx.expression(1));
-        String operator = getOperatorOverload(ctx.intAddOp().getText());
-        return switch (operator) {
-            case "+" -> (Integer) val1 + (Integer) val2;
-            case "-" -> (Integer) val1 - (Integer) val2;
-            case "*" -> (Integer) val1 * (Integer) val2;
-            case "/" -> (Integer) val1 / (Integer) val2;
-            case "%" -> (Integer) val1 % (Integer) val2;
-            default -> null;
-        };
+    public Object visitAddOpExpression(GLangParser.AddOpExpressionContext ctx) {
+        return this.arithmeticsVisitor.visitAddOpExpression(ctx);
     }
 
     @Override
-    public Object visitIntMultiOpExpression(GLangParser.IntMultiOpExpressionContext ctx) {
-        Object val1 = visit(ctx.expression(0));
-        Object val2 = visit(ctx.expression(1));
-        //TODO - validation etc
-        String operator = getOperatorOverload(ctx.intMultiOp().getText());
-        return switch (operator) {
-            case "*" -> (Integer) val1 * (Integer) val2;
-            case "/" -> (Integer) val1 / (Integer) val2;
-            case "%" -> (Integer) val1 % (Integer) val2;
-            case "+" -> (Integer) val1 + (Integer) val2;
-            case "-" -> (Integer) val1 - (Integer) val2;
-            default -> null;
-        };
+    public Object visitMultiOpExpression(GLangParser.MultiOpExpressionContext ctx) {
+        return this.arithmeticsVisitor.visitMultiOpExpression(ctx);
     }
 
     @Override
