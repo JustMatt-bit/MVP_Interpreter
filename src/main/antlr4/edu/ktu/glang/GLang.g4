@@ -34,18 +34,23 @@ assignment : ID '=' expression ;
 expression
     : INT                               #intExpression
     | ID                                #idExpression
+    | DOUBLE                            #doubleExpression
     | STRING                            #stringExpression
+    | BOOLEAN                           #booleanExpression
     | '(' expression ')'                #parenthesesExpression
-    | expression intMultiOp expression  #intMultiOpExpression
-    | expression intAddOp expression    #intAddOpExpression
+    | expression multiOp expression     #multiOpExpression
+    | expression addOp expression       #addOpExpression
     | functionCall                      #functionExpression
     ;
 
-intMultiOp : '*' | '/' | '%' ;
-intAddOp : '+' | '-' ;
+multiOp : '*' | '/' | '%' ;
+addOp : '+' | '-' ;
 
 
-ifStatement : 'if' '(' expression relationOp expression ')' block ('else' block )? ;
+ifStatement : 'if' '(' condition ')' block ('else' block )? ;
+
+condition : (expression relationOp expression) | expression ;
+
 
 functionCall : ID '(' argumentsList? ')' ;
 
@@ -68,12 +73,15 @@ printStatement : PRINT '(' expression ')' ;
 TYPE    : 'int'
         | 'bool'
         | 'string'
+        | 'double'
         ;
 
 VOID : 'void' ;
-PRINT   : 'print';
+PRINT   : 'print' ;
+BOOLEAN : 'true' | 'false' ;
 ID      : [a-zA-Z]+ ;
 INT     : [0-9]+ ;
+DOUBLE  : [0-9]+ '.' [0-9]+ | [0-9]+;
 STRING : '"' (~["\\r\\n] | '\\' ["\\r\\n])* '"';
 
 

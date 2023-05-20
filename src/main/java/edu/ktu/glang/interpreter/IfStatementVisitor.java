@@ -14,15 +14,23 @@ public class IfStatementVisitor extends GLangBaseVisitor<Object> {
 
     @Override
     public Object visitIfStatement(GLangParser.IfStatementContext ctx) {
-        // Get the left and right expressions from the context
-        Object left = parent.visit(ctx.expression(0));
-        Object right = parent.visit(ctx.expression(1));
+        Boolean ifCondition = null;
+        if(ctx.condition().relationOp() != null){
+            // Get the left and right expressions from the context
+            Object left = parent.visit(ctx.condition().expression(0));
+            Object right = parent.visit(ctx.condition().expression(1));
 
-        // Get the relation operator from the context
-        TerminalNode relOpNode = (TerminalNode) ctx.relationOp().getChild(0);
-        String operator = parent.getOperatorOverload(relOpNode.getText());
+            // Get the relation operator from the context
+            //TerminalNode relOpNode = (TerminalNode) ctx.condition().relationOp().getChild(0);
+            String operator = parent.getOperatorOverload(ctx.condition().relationOp().getText());
+            ifCondition = resolveCondition(left, right, operator);
+        }
+        else{
+            ifCondition = (Boolean) parent.visit(ctx.condition().expression(0));
+        }
+
         // Resolve the condition and execute the appropriate statement
-        if (resolveCondition(left, right, operator)) {
+        if (ifCondition) {
             return parent.visit(ctx.block(0));
         } else if (ctx.block(1) != null) {
             return parent.visit(ctx.block(1));

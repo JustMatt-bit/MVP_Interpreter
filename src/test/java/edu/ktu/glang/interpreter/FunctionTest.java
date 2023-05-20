@@ -211,15 +211,15 @@ public class FunctionTest {
     @Test
     void function_return_value(){
         String program = """
-                        fun int testas () {
-                            return 5;
+                        fun double testas () {
+                            return 5.5;
                         }
-                        int a = testas();
+                        double a = testas();
                         print(a);
                          """;
 
         String expected = """
-                          5
+                          5.5
                           """;
 
         String actual = GLangInterpreter.execute(program);
