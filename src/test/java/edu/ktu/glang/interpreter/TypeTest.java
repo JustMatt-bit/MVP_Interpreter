@@ -24,12 +24,12 @@ public class TypeTest {
     void int_type_assignment(){
         String program = """
                          int a = 5;
-                         a = 4;
+                         a = -4;
                          print(a);
                          """;
 
         String expected = """
-                          4
+                          -4
                           """;
 
         String actual = GLangInterpreter.execute(program);
@@ -55,12 +55,12 @@ public class TypeTest {
     void double_type_assignment(){
         String program = """
                          double a = 5.432;
-                         a = 4.357;
+                         a = -4.357;
                          print(a);
                          """;
 
         String expected = """
-                          4.357
+                          -4.357
                           """;
 
         String actual = GLangInterpreter.execute(program);
@@ -86,12 +86,12 @@ public class TypeTest {
     void string_type_assignment(){
         String program = """
                          string a = "abc";
-                         a = "abd";
+                         a = "var";
                          print(a);
                          """;
 
         String expected = """
-                          abd
+                          var
                           """;
 
         String actual = GLangInterpreter.execute(program);

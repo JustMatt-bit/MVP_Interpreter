@@ -1,8 +1,10 @@
 package edu.ktu.glang.interpreter;
 
+import edu.ktu.glang.interpreter.types.ArrayValue;
 import edu.ktu.glang.interpreter.types.Type;
 import edu.ktu.glang.interpreter.types.Value;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ public class MVPLangScope {
 
     private final MVPLangScope parent;
     private final Map<String, Value> symbols = new HashMap<>();
+    private final Map<String, ArrayValue> arrays = new HashMap<>();
     private final Map<String, String> operatorOverload = new HashMap<>();
     public MVPLangScope(){
         this.parent = null;
@@ -59,6 +62,53 @@ public class MVPLangScope {
             return parent.resolveVariable(variableName);
         }
     }
+
+    //-------------------------------------
+    public void declareArray(String variableName, ArrayValue value){
+        if(isDeclared(variableName)){
+            throw new RuntimeException(String.format("Variable name '%s' is already used.", variableName));
+        }
+        if(arrayIsDeclared(variableName)){
+            throw new RuntimeException(String.format("Array '%s' is already declared.", variableName));
+        }
+        arrays.put(variableName, value);
+    }
+
+    public boolean arrayIsDeclared(String variableName){
+        if(arrays.containsKey(variableName)){
+            return true;
+        }
+        return parent != null && parent.arrayIsDeclared(variableName);
+    }
+
+    public void changeArray(String variableName, Object[] expValue){
+        if(!isDeclared(variableName)){
+            throw new RuntimeException("Array is not declared");
+        }
+        if(arrays.containsKey(variableName)){
+            ArrayValue value = arrays.get(variableName);
+            value.setValue(expValue);
+            arrays.put(variableName, value);
+        }
+        else{
+            assert parent != null;
+            parent.changeArray(variableName, expValue);
+        }
+    }
+
+    public ArrayValue resolveArray(String variableName){
+        if (!arrayIsDeclared(variableName)) {
+            throw new RuntimeException("Array is not declared");
+        }
+        if (arrays.containsKey(variableName)) {
+            return arrays.get(variableName);
+        } else {
+            assert parent != null;
+            return parent.resolveArray(variableName);
+        }
+    }
+
+    // ----------------------------
 
     private boolean isOverloaded(String operator){
         if(operatorOverload.containsKey(operator)){
