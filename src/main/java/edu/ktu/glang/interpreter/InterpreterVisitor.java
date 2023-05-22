@@ -118,6 +118,25 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitSwitchStatement(GLangParser.SwitchStatementContext ctx) {
+        Object expValue = visit(ctx.expression());
+        boolean caseFound = false;
+        var cases = ctx.cases();
+        for(GLangParser.CasesContext caseCtx : cases){
+            Object caseExpValue = visit(caseCtx.expression());
+            if(expValue.equals(caseExpValue)){
+                caseFound = true;
+                visitBlock(caseCtx.block());
+                break;
+            }
+        }
+        if(!caseFound && ctx.block() != null){
+            visitBlock(ctx.block());
+        }
+        return null;
+    }
+
+    @Override
     public Object visitBlock(GLangParser.BlockContext ctx) {
         scopeStack.push(currentScope);
         currentScope = new MVPLangScope(currentScope);

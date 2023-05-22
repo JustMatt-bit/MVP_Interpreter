@@ -1,1 +1,17 @@
-print("abc" + 2.5);
+fun double testas () {
+    return 5.6;
+}
+switch(testas()):
+case ("abd") {
+    print(1);
+}
+case (5.5) {
+    int a = 2;
+    print(a);
+}
+case ("cba") {
+    print(3);
+}
+default{
+    print("default");
+}
