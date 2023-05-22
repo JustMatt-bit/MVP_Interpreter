@@ -11,6 +11,7 @@ statement
     : variableDeclaration ';'
     | assignment ';'
     | functionCall
+    | switchStatement
     | ifStatement
     | printStatement ';'
     | returnStatement ';' ;
@@ -50,6 +51,10 @@ addOp : '+' | '-' ;
 ifStatement : 'if' '(' condition ')' block ('else' block )? ;
 
 condition : (expression relationOp expression) | expression ;
+
+switchStatement : 'switch' '(' expression ')' ':' cases* ('default' block)? ;
+
+cases : 'case' '('expression')' block;
 
 
 functionCall : ID '(' argumentsList? ')' ;
