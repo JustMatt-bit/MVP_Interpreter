@@ -10,6 +10,8 @@ line
 statement
     : variableDeclaration ';'
     | assignment ';'
+    | arrayDeclaration ';'
+    | arrayElementAssignment ';'
     | functionCall
     | switchStatement
     | ifStatement
@@ -32,9 +34,15 @@ variableDeclaration : TYPE ID '=' expression ;
 
 assignment : ID '=' expression ;
 
+arrayDeclaration : TYPE '[' expression ']' ID ('=' '{' arrayElements '}')? ;
+arrayElements : expression (',' expression)* ;
+
+arrayElementAssignment : ID '[' expression ']' '=' expression ;
+
 expression
     : INT                               #intExpression
     | ID                                #idExpression
+    | ID'['expression']'                #arrayExpression
     | DOUBLE                            #doubleExpression
     | STRING                            #stringExpression
     | BOOLEAN                           #booleanExpression
@@ -81,14 +89,13 @@ TYPE    : 'int'
         | 'double'
         ;
 
+STRING  : '"' ( ~('"'|'\\') )* '"' ;
 VOID : 'void' ;
 PRINT   : 'print' ;
 BOOLEAN : 'true' | 'false' ;
 ID      : [a-zA-Z]+ ;
-INT     : [0-9]+ ;
-DOUBLE  : [0-9]+ '.' [0-9]+ | [0-9]+;
-STRING : '"' (~["\\r\\n] | '\\' ["\\r\\n])* '"';
-
+INT     : '-'? [0-9]+ ;
+DOUBLE  : '-'? [0-9]+ '.' [0-9]+ | [0-9]+;
 
 COMMENT : ( '//' ~[\r\n]* | '/*' .*? '*/' ) -> skip ;
 WS      : [ \t\r\n]+ -> skip ;

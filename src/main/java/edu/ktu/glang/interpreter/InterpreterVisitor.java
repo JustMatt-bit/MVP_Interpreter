@@ -3,6 +3,7 @@ package edu.ktu.glang.interpreter;
 import edu.ktu.glang.GLangBaseVisitor;
 import edu.ktu.glang.GLangParser;
 import edu.ktu.glang.interpreter.exception.MVPReturnStatementException;
+import edu.ktu.glang.interpreter.types.ArrayValue;
 import edu.ktu.glang.interpreter.types.Type;
 import edu.ktu.glang.interpreter.types.Value;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -59,6 +60,50 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitArrayDeclaration(GLangParser.ArrayDeclarationContext ctx) {
+        String arrType = ctx.TYPE().getText();
+        String arrName = ctx.ID().getText();
+        int size = (int)visit(ctx.expression());
+        Object[] array = new Object[size];
+        if(ctx.arrayElements() != null){
+            var elements = ctx.arrayElements().expression();
+            if(elements.size() > size){
+                throw new IndexOutOfBoundsException("Given argument count is bigger than declared array size");
+            }
+            for(int i = 0; i < elements.size(); i++){
+                Object element = visit(elements.get(i));
+                element = Type.castObjectToType(element, arrType);
+                array[i] = element;
+            }
+        }
+        ArrayValue value = new ArrayValue(Type.createType(arrType), array);
+        currentScope.declareArray(arrName, value);
+        return null;
+    }
+
+    @Override
+    public Object visitArrayElementAssignment(GLangParser.ArrayElementAssignmentContext ctx) {
+        String arrName = ctx.ID().getText();
+        ArrayValue arrayValue = this.currentScope.resolveArray(arrName);
+        Object[] array = arrayValue.getValue();
+        int index = (int)visit(ctx.expression(0));
+        Object expValue = visit(ctx.expression(1));
+        expValue = Type.castObjectToType(expValue, arrayValue.getType().getBaseType());
+        array[index] = expValue;
+        return null;
+    }
+
+    @Override
+    public Object visitArrayExpression(GLangParser.ArrayExpressionContext ctx) {
+        String arrName = ctx.ID().getText();
+        ArrayValue arrayValue = this.currentScope.resolveArray(arrName);
+        int index = (int)visit(ctx.expression());
+        Object[] array = arrayValue.getValue();
+        Object value = array[index];
+        return value;
+    }
+
+    @Override
     public Object visitIntExpression(GLangParser.IntExpressionContext ctx) {
         return Integer.parseInt(ctx.INT().getText());
     }
@@ -91,9 +136,13 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
 
     @Override
     public Object visitPrintStatement(GLangParser.PrintStatementContext ctx) {
-        Object text = visit(ctx.expression()).toString();
-        //System.out.println(text);
-        SYSTEM_OUT.append(text).append("\n");
+        Object value = visit(ctx.expression());
+        if(value == null){
+            SYSTEM_OUT.append("null").append("\n");
+        }
+        else {
+            SYSTEM_OUT.append(value.toString()).append("\n");
+        }
         return null;
     }
 
