@@ -16,10 +16,11 @@ statement
     | switchStatement
     | ifStatement
     | printStatement ';'
+    | printFileStatement ';'
     | returnStatement ';' ;
 
 
-functionDeclaration : 'fun' (TYPE | VOID) ID '(' paramList? ')' functionBody ;
+functionDeclaration : 'fun' (TYPE | VOID) ID '<' paramList? '>' functionBody ;
 
 //paramList : TYPE ID (',' TYPE ID)* ;
 paramList: param (',' param)* ;
@@ -30,14 +31,14 @@ typeParam : TYPE ID ;
 
 functionBody : block ;
 
-variableDeclaration : TYPE ID '=' expression ;
+variableDeclaration : TYPE ID '(' expression ')' ;
 
-assignment : ID '=' expression ;
+assignment : ID '(' expression ')' ;
 
-arrayDeclaration : TYPE '[' expression ']' ID ('=' '{' arrayElements '}')? ;
+arrayDeclaration : TYPE '[' expression ']' ID ('(' arrayElements ')')? ;
 arrayElements : expression (',' expression)* ;
 
-arrayElementAssignment : ID '[' expression ']' '=' expression ;
+arrayElementAssignment : ID '[' expression ']' '(' expression ')' ;
 
 expression
     : INT                               #intExpression
@@ -65,7 +66,7 @@ switchStatement : 'switch' '(' expression ')' ':' cases* ('default' block)? ;
 cases : 'case' '('expression')' block;
 
 
-functionCall : ID '(' argumentsList? ')' ;
+functionCall : ID '<' argumentsList? '>' ;
 
 argumentsList
 : (expression | operatorOverload) (',' (expression | operatorOverload))*
@@ -82,6 +83,7 @@ relationOp : '==' | '!=' | '>' | '<' | '<=' | '>=';
 arithmeticOp : '+' | '-' | '*' | '/' | '%' ;
 
 printStatement : PRINT '(' expression ')' ;
+printFileStatement : NEW? PRINT '<' expression '>' '('expression')' ;
 
 TYPE    : 'int'
         | 'bool'
@@ -92,6 +94,7 @@ TYPE    : 'int'
 STRING  : '"' ( ~('"'|'\\') )* '"' ;
 VOID : 'void' ;
 PRINT   : 'print' ;
+NEW : 'new';
 BOOLEAN : 'true' | 'false' ;
 ID      : [a-zA-Z]+ ;
 INT     : '-'? [0-9]+ ;

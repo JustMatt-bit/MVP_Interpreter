@@ -10,7 +10,7 @@ public class VariablesDeclarationTest {
     @Test
     void declare_and_print_variable() {
         String program = """
-                         int a = 5;            
+                         int a(5);            
                          print(a);       
                          """;
 
@@ -26,7 +26,7 @@ public class VariablesDeclarationTest {
     @Test
     void undeclared_variable_throws_exception() {
         String program = """
-                         a = 5;            
+                         a(5);            
                          print(a);       
                          """;
 
@@ -39,8 +39,8 @@ public class VariablesDeclarationTest {
     @Test
     void assing_variable_and_print() {
         String program = """
-                         int a = 5;
-                         a = 6;          
+                         int a(5);
+                         a(6);          
                          print(a);       
                          """;
 
@@ -56,8 +56,8 @@ public class VariablesDeclarationTest {
     @Test
     void assing_variable_with_type_mismatch() {
         String program = """
-                         int a = 5;
-                         a = "abc";                  
+                         int a(5);
+                         a("abc");                  
                          """;
 
         assertThrows(ClassCastException.class,

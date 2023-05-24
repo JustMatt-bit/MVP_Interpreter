@@ -1,3 +1,4 @@
-string[2] arr;
-arr[1] = "var";
-print(arr[1]);
+string str("123456789");
+new print<"Rezultatai.txt">(str);
+print<"Rezultatai.txt">(-25);
+new print<"Rezultatai.txt">(true);
