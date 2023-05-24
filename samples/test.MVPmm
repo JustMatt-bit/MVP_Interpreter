@@ -1,0 +1,14 @@
+fun int testas <int n> {
+    if(n <= 1){
+        return n;
+    }
+    else{
+        int recOne(n - 1);
+        int recTwo(n - 2);
+        int fib(testas<recOne> + testas<recTwo>);
+    return fib;
+    }
+}
+int b(12);
+int a(testas<b>);
+print(a);
