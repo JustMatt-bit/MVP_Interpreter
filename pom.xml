@@ -91,7 +91,7 @@
                             <appendAssemblyId>false</appendAssemblyId>
                             <archive>
                                 <manifest>
-                                    <mainClass>edu.ktu.glang.interpreter.GLangInterpreter</mainClass>
+                                    <mainClass>edu.ktu.MVPmm.interpreter.MVPmmInterpreter</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

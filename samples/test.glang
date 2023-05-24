@@ -1,4 +1,0 @@
-string str("123456789");
-new print<"Rezultatai.txt">(str);
-print<"Rezultatai.txt">(-25);
-new print<"Rezultatai.txt">(true);
