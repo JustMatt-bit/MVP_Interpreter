@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="glang-interpreter [clean,install]" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="MVPmm-interpreter [generate-visitor]" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -11,7 +11,7 @@
           <option name="goals">
             <list>
               <option value="clean" />
-              <option value="install" />
+              <option value="antlr4:antlr4@generate-visitor" />
             </list>
           </option>
           <option name="pomFileName" value="pom.xml" />
