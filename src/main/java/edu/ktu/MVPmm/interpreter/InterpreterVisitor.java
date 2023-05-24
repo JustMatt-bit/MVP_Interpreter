@@ -233,6 +233,60 @@ public class InterpreterVisitor extends MVPmmBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitRange(MVPmmParser.RangeContext ctx) {
+        return new int[] { (int)this.visit(ctx.INT(0)), (int)this.visit(ctx.INT(1)) };
+    }
+
+    @Override
+    public Object visitForStatement(MVPmmParser.ForStatementContext ctx) {
+        scopeStack.push(currentScope);
+        currentScope = new MVPLangScope(currentScope); // Create a new scope for the block
+        // Initialization
+        visit(ctx.variableDeclaration());
+
+        while (true) {
+            Boolean loopCondition = null;
+
+            // Handle condition
+            if(ctx.condition().relationOp() != null){
+                Object left = visit(ctx.condition().expression(0));
+                Object right = visit(ctx.condition().expression(1));
+                String operator = getOperatorOverload(ctx.condition().relationOp().getText());
+                loopCondition = resolveCondition(left, right, operator);
+            }
+            else{
+                loopCondition = (Boolean) visit(ctx.condition().expression(0));
+            }
+
+            // Exit if the condition is not satisfied
+            if (!loopCondition) {
+                break;
+            }
+
+            // Handle skipRange and range
+            if (ctx.range() != null) {
+                Integer start = Integer.parseInt(ctx.range().INT(0).getText());
+                Integer end = Integer.parseInt(ctx.range().INT(1).getText());
+                Value val1 = currentScope.resolveVariable(ctx.variableDeclaration().ID().toString());
+                Integer current = Integer.parseInt(val1.toString());
+
+                if (current >= start && current <= end) {
+                    visit(ctx.assignment());
+                    continue;
+                }
+            }
+
+            // Execute the block of statements in the loop
+            visit(ctx.block());
+
+            // Perform the operation
+            visit(ctx.assignment());
+        }
+        currentScope = scopeStack.pop();
+        return null;  // or return a default value or another appropriate action
+    }
+
+    @Override
     public Object visitFunctionCall(MVPmmParser.FunctionCallContext ctx) {
         String funName = ctx.ID().getText();
         if(!functions.containsKey(funName)){
@@ -253,21 +307,19 @@ public class InterpreterVisitor extends MVPmmBaseVisitor<Object> {
                 for(int i = 0; i < funParams.size(); i++){
                     var param = funParams.get(i);
                     var arg = expressions.get(i);
-                    Value argValue = currentScope.resolveVariable(arg.getText());
-                    Type.BaseType argType = argValue.getType().getBaseType();
-                    Type reqType = Type.createType(param.typeParam().TYPE().getText());
-                    if(argType != reqType.getBaseType()){
-                        throw new RuntimeException("Function argument type mismatch");
-                    }
+                    Object expValue = visit(arg);
+                    Type.castObjectToType(expValue, param.typeParam().TYPE().getText());
                 }
             }
             // Saving function call arguments into the function scope
             for(int i = 0; i < expressions.size(); i++){
                 var param = funParams.get(i);
                 var arg = expressions.get(i);
-                Value value = currentScope.resolveVariable(expressions.get(i).getText());
+                Object expValue = visit(arg);
+                Type reqType = Type.createType(param.typeParam().TYPE().getText());
+                Value value = new Value(reqType, expValue);
                 Value copyValue = new Value(value);
-                functionScope.declareVariable(param.typeParam().ID().getText(), value);
+                functionScope.declareVariable(param.typeParam().ID().getText(), copyValue);
             }
         }
 
@@ -327,6 +379,58 @@ public class InterpreterVisitor extends MVPmmBaseVisitor<Object> {
         }
         else {
             return operator;
+        }
+    }
+
+    private boolean resolveCondition(Object left, Object right, String relOp) {
+        switch (relOp) {
+            case "==" -> {
+                if(left instanceof Integer && right instanceof Integer) {
+                    return left == right;
+                } else if (left instanceof String && right instanceof String) {
+                    return (left).equals(right);
+                } else {
+                    throw new RuntimeException("Incompatible types.");
+                }
+            }
+            case "!=" -> {
+                if(left instanceof Integer && right instanceof Integer) {
+                    return left != right;
+                } else if (left instanceof String && right instanceof String) {
+                    return !left.equals(right);
+                } else {
+                    throw new RuntimeException("Incompatible types.");
+                }
+            }
+            case ">" -> {
+                if(left instanceof Integer && right instanceof Integer) {
+                    return (Integer)left > (Integer)right;
+                } else {
+                    throw new RuntimeException("Incompatible types or unsupported operator for these types.");
+                }
+            }
+            case "<" -> {
+                if(left instanceof Integer && right instanceof Integer) {
+                    return (Integer)left < (Integer)right;
+                } else {
+                    throw new RuntimeException("Incompatible types or unsupported operator for these types.");
+                }
+            }
+            case ">=" -> {
+                if(left instanceof Integer && right instanceof Integer) {
+                    return (Integer)left >= (Integer)right;
+                } else {
+                    throw new RuntimeException("Incompatible types or unsupported operator for these types.");
+                }
+            }
+            case "<=" -> {
+                if(left instanceof Integer && right instanceof Integer) {
+                    return (Integer)left <= (Integer)right;
+                } else {
+                    throw new RuntimeException("Incompatible types or unsupported operator for these types.");
+                }
+            }
+            default -> throw new RuntimeException("Unsupported operator.");
         }
     }
 }

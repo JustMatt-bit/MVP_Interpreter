@@ -17,6 +17,7 @@ statement
     | ifStatement
     | printStatement ';'
     | printFileStatement ';'
+    | forStatement
     | returnStatement ';' ;
 
 
@@ -59,7 +60,11 @@ addOp : '+' | '-' ;
 
 ifStatement : 'if' '(' condition ')' block ('else' block )? ;
 
+forStatement : 'for' '(' variableDeclaration ';' assignment ';' condition ')' (range)? block ;
+
 condition : (expression relationOp expression) | expression ;
+
+range : 'skip(' INT ':' INT ')' ;
 
 switchStatement : 'switch' '(' expression ')' ':' cases* ('default' block)? ;
 

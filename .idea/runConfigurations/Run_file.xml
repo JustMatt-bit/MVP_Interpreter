@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run file" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="edu.ktu.MVPmm.interpreter.MVPmmInterpreter" />
-    <module name="MVPmm-interpreter" />
+    <module name="MVP_Interpreter" />
     <option name="PROGRAM_PARAMETERS" value="-f samples/test.MVPmm" />
     <extension name="coverage">
       <pattern>
