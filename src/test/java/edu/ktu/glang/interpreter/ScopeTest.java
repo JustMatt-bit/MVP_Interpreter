@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ScopeTest {
     @Test
-    void variable_in_cope(){
+    void variable_in_scope(){
         String program = """
                          if(5 == 5){
-                         int a = 5;
+                         int a(5);
                          print(a);
                          }
                          """;
@@ -27,7 +27,7 @@ public class ScopeTest {
     void variable_out_of_scope(){
         String program = """
                          if(5 == 5){
-                         int a = 5;
+                         int a(5);
                          }
                          print(a);
                          """;
@@ -40,11 +40,11 @@ public class ScopeTest {
     @Test
     void variable_out_of_function_scope(){
         String program = """
-                        int a = 5;
-                        fun void testas () {
+                        int a(5);
+                        fun void testas <> {
                         print(a);
                         }
-                        testas();
+                        testa<>;
                          """;
 
         assertThrows(RuntimeException.class,
@@ -57,7 +57,7 @@ public class ScopeTest {
     void variable_only_in_function_scope(){
         String program = """
                         fun void testas () {
-                        int a = 5;
+                        int a(5);
                         }
                         testas();
                         print(a);
@@ -72,12 +72,12 @@ public class ScopeTest {
     @Test
     void return_in_function(){
         String program = """
-                        fun void testas () {
+                        fun void testas <> {
                         print(5);
                         return;
                         print(6);
                         }
-                        testas()
+                        testas<>
                          """;
 
         String expected = """

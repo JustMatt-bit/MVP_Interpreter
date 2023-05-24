@@ -8,6 +8,8 @@ import edu.ktu.glang.interpreter.types.Type;
 import edu.ktu.glang.interpreter.types.Value;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +144,24 @@ public class InterpreterVisitor extends GLangBaseVisitor<Object> {
         }
         else {
             SYSTEM_OUT.append(value.toString()).append("\n");
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitPrintFileStatement(GLangParser.PrintFileStatementContext ctx) {
+        String filePath = visit(ctx.expression(0)).toString();
+        Object value = visit(ctx.expression(1));
+        boolean append = ctx.NEW() == null;
+        String valueStr = (value == null) ? "null" : value.toString();
+        PrintWriter writer = null;
+        try{
+            writer = new PrintWriter(new FileWriter(filePath, append));
+            writer.write(valueStr + "\n");
+            writer.close();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
